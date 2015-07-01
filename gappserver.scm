@@ -14,12 +14,24 @@
 	     (rnrs io ports)) ;binary ports
 
 (define sep file-name-separator-string)
+;(define addr "10.30.178.161")
 
-(define args (command-line))
+(define args (cdr (command-line)))
+(define port
+  (if (null? args)
+      8080
+      (begin
+	(let ((fst (car args)))
+	  (set! args (cdr args))
+	  (string->number fst)))))
+
 (define rootdir
-  (if (null? (cdr args))
+  (if (null? args)
       (getcwd)
-      (cadr args)))
+      (begin
+	(let ((fst (car args)))
+	  (set! args (cdr args))
+	  fst))))
 
 (display (string-append "running with root: " rootdir "\n"))
 
@@ -92,4 +104,4 @@
 		  (get-bytevector-all in-port)))))
      (else (no-such-method request)))))
 
-(run-server server-handler)
+(run-server server-handler 'http `(#:port ,port #:addr ,INADDR_ANY))
